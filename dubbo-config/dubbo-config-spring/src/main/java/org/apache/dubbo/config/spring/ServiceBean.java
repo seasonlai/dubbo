@@ -71,8 +71,10 @@ public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
+        //向工具类添加一个容器
         SpringExtensionFactory.addApplicationContext(applicationContext);
         try {
+            //把自身作为ApplicationListener添加到容器中
             Method method = applicationContext.getClass().getMethod("addApplicationListener", ApplicationListener.class); // backward compatibility to spring 2.0.1
             method.invoke(applicationContext, this);
             supportedApplicationListener = true;
@@ -111,7 +113,8 @@ public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean
             if (logger.isInfoEnabled()) {
                 logger.info("The service ready on spring started. service: " + getInterface());
             }
-            export();
+            //继承了ApplicationListener<ContextRefreshedEvent>
+            export();//在容器refresh的时候就开始暴露
         }
     }
 
@@ -121,18 +124,21 @@ public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean
         if (delay == null && provider != null) {
             delay = provider.getDelay();
         }
+        //supportedApplicationListener表示已以监听者形式加入容器中
         return supportedApplicationListener && (delay == null || delay == -1);
     }
 
     @Override
     @SuppressWarnings({"unchecked", "deprecation"})
     public void afterPropertiesSet() throws Exception {
+        //下面对一些属性进行补充，ProviderConfig、ApplicationConfig、ModuleConfig等
         if (getProvider() == null) {
             Map<String, ProviderConfig> providerConfigMap = applicationContext == null ? null : BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, ProviderConfig.class, false, false);
             if (providerConfigMap != null && providerConfigMap.size() > 0) {
                 Map<String, ProtocolConfig> protocolConfigMap = applicationContext == null ? null : BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, ProtocolConfig.class, false, false);
                 if ((protocolConfigMap == null || protocolConfigMap.size() == 0)
                         && providerConfigMap.size() > 1) { // backward compatibility
+                    //protocolConfigMap为空，但providerConfigMap数量大于1进入这
                     List<ProviderConfig> providerConfigs = new ArrayList<ProviderConfig>();
                     for (ProviderConfig config : providerConfigMap.values()) {
                         if (config.isDefault() != null && config.isDefault()) {

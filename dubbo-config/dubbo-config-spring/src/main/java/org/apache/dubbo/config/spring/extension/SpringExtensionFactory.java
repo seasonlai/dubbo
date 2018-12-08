@@ -28,6 +28,7 @@ import org.springframework.context.ApplicationContext;
 
 /**
  * SpringExtensionFactory
+ * 工具类，用于获取容器中的指定bean
  */
 public class SpringExtensionFactory implements ExtensionFactory {
     private static final Logger logger = LoggerFactory.getLogger(SpringExtensionFactory.class);
