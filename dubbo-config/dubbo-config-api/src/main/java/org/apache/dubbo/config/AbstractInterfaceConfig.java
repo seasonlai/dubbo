@@ -163,7 +163,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
             for (RegistryConfig config : registries) {
                 String address = config.getAddress();
                 if (address == null || address.length() == 0) {
-                    address = Constants.ANYHOST_VALUE;
+                    address = Constants.ANYHOST_VALUE;//0.0.0.0
                 }
                 String sysaddress = System.getProperty("dubbo.registry.address");
                 if (sysaddress != null && sysaddress.length() > 0) {
